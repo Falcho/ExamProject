@@ -23,19 +23,20 @@ public class Routes
     public  EndpointGroup getRoutes()
     {
         return () -> {
-            path("skilesson", tripRoutes());
+            path("skilesson", SkiLessonRoutes());
             path("auth", authRoutes());
             path("protected", protectedRoutes());
         };
     }
 
-    private  EndpointGroup tripRoutes()
+    private  EndpointGroup SkiLessonRoutes()
     {
         return () -> {
             get(skiLessonController::getAll);
             get("/level", skiLessonController::filterByLevel);
+            get("/stats", skiLessonController::getInstructorStats);
             get("/{id}", skiLessonController::getById);
-            get("/instructor/{id}/overview", skiLessonController::getInstructorsOverview);
+            get("/instructor/{id}/overview", skiLessonController::getSkiLessonsByInstructor);
             post(skiLessonController::create);
             put("/{lessonId}/instructor/{instructorId}", skiLessonController::addInstructor);
             patch("/{id}", skiLessonController::update);
