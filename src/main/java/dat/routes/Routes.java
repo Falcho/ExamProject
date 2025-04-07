@@ -38,7 +38,7 @@ public class Routes
             get("/{id}", skiLessonController::getById); // Tested
             get("/instructor/{id}/overview", skiLessonController::getSkiLessonsByInstructor);
             post(skiLessonController::create); // Tested
-            put("/{lessonId}/instructor/{instructorId}", skiLessonController::addInstructor);
+            put("/{lessonId}/instructor/{instructorId}", skiLessonController::addInstructor); // Tested
             patch("/{id}", skiLessonController::update); // Tested
             delete("/{id}", skiLessonController::delete); // Tested
             post("/populate", skiLessonController::populate); // NO NEED FOR TESTING

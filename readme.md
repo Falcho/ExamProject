@@ -1,21 +1,8 @@
-Remember to add a config.properties file in the resources directory. The config.properties file should contain the following properties:
-```
-DB_NAME=
-DB_USERNAME=
-DB_PASSWORD=
-SECRET_KEY=
-ISSUER=
-TOKEN_EXPIRE_TIME=1800000
-```
-The DB_NAME, DB_USERNAME, DB_PASSWORD, ISSUER, and TOKEN_EXPIRE_TIME properties should be filled in with the appropriate values. The SECRET_KEY property should be a minimum of 32 characters long.
-
-Theoretical questions:
-    3.3.5 :
+Here are my answers to the questions and the code for the ski lesson application.
+<details>
+    <summary>Endpoints, and responses </summary>
 
 
-Endpoints, and responses:
-
-###
 GET localhost:7070/api/skilesson
 ```
 [
@@ -404,3 +391,29 @@ POST localhost:7070/api/skilesson/populate
 ```
 <Response body is empty>
 ```
+</details>
+
+#### Theoretical question answers
+335. : You recommend using PUT instead of Post, because PUT will replace the entire resource at the specified URI, while POST will create a new resource. In this case, since you are updating an existing ski lesson, PUT is the more appropriate choice.
+
+#### Security
+When my test would start to fail because of the Unauthorized response, i would have to login with an appropriate role (admin would be easier for testing purposes) and then once logged in, i should be able to access the endpoints. The login endpoint is localhost:7070/api/auth/login. The response will contain a JWT token, which should be used in the Authorization header for subsequent requests.
+
+
+#### Database
+<details>
+    <summary>Database setup</summary>
+Remember to add a config.properties file in the resources directory. The config.properties file should contain the following properties:
+
+````
+DB_NAME=
+DB_USERNAME=
+DB_PASSWORD=
+SECRET_KEY=
+ISSUER=
+TOKEN_EXPIRE_TIME=1800000
+````
+
+The DB_NAME, DB_USERNAME, DB_PASSWORD, ISSUER, and TOKEN_EXPIRE_TIME properties should be filled in with the appropriate values. The SECRET_KEY property should be a minimum of 32 characters long.
+
+</details>
