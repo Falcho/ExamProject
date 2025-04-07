@@ -13,10 +13,10 @@ Content-Type: application/json
 {
   "startTime": "09:00",
   "endTime": "12:00",
-  "startPosition": "Harbor Station",
-  "name": "Harbor Explorer",
+  "startPosition": "47.3455, 12.7965",
+  "name": "Beginner Avalanche Survival",
   "price": 45.50,
-  "skilesson": "SEA"
+  "level": "BEGINNER"
 }
 
 ###
@@ -24,7 +24,7 @@ PUT localhost:7070/api/skilesson/13/instructor/1
 
 
 ###
-PUT localhost:7070/api/skilesson/13
+PATCH localhost:7070/api/skilesson/13
 Content-Type: application/json
 
 {
