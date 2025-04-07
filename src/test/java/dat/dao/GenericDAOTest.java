@@ -13,86 +13,69 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-class GenericDAOTest
-{
+class GenericDAOTest {
     private static EntityManagerFactory emf;
     private static GenericDAO genericDAO;
     private static SkiLesson t1, t2;
-    private static Instructor g1, g2, g3, g4;
+    private static Instructor g1, g2;
 
     @BeforeAll
-    static void setUpClass()
-    {
+    static void setUpClass() {
         emf = HibernateConfig.getEntityManagerFactoryForTest();
         genericDAO = new GenericDAO(emf);
     }
 
     @AfterAll
-    static void tearDownClass()
-    {
-        if (emf != null)
-        {
+    static void tearDownClass() {
+        if (emf != null) {
             emf.close();
         }
     }
 
     @BeforeEach
-    void setUp()
-    {
-        try (EntityManager em = emf.createEntityManager())
-        {
+    void setUp() {
+        try (EntityManager em = emf.createEntityManager()) {
             g1 = new Instructor("Jack", "Sparrow");
-            g2 = new Instructor("Iron","Man");
-            g3 = new Instructor("Peter", "Parker");
-            g4 = new Instructor("Bruce", "Wayne");
+            g2 = new Instructor("Iron", "Man");
             t1 = new SkiLesson("Level A");
             t2 = new SkiLesson("Level B");
-            t1.addInstructor(g1);
-            t1.addInstructor(g2);
-            t2.addInstructor(g3);
-            t2.addInstructor(g4);
             em.getTransaction().begin();
             em.createQuery("DELETE FROM Instructor").executeUpdate();
             em.createQuery("DELETE FROM SkiLesson").executeUpdate();
             em.persist(t1);
             em.persist(t2);
+            em.persist(g1);
+            em.persist(g2);
             em.getTransaction().commit();
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             fail("Setup failed: " + e.getMessage());
         }
     }
 
     @Test
-    void getInstance()
-    {
+    void getInstance() {
         assertNotNull(emf);
     }
 
     @Test
-    void create()
-    {
+    void create() {
         SkiLesson t3 = new SkiLesson("Level C");
-        Instructor g5 = new Instructor("Clark", "Kent");
-        t3.addInstructor(g5);
 
         SkiLesson result = genericDAO.create(t3);
 
+
         assertNotNull(result);
         assertThat(result, samePropertyValuesAs(t3));
-        try (EntityManager em = emf.createEntityManager())
-        {
+        try (EntityManager em = emf.createEntityManager()) {
             SkiLesson found = em.find(SkiLesson.class, result.getId());
-            assertThat(found, samePropertyValuesAs(t3, "rooms"));
+            assertThat(found, samePropertyValuesAs(t3));
             Long amountInDb = em.createQuery("SELECT COUNT(t) FROM SkiLesson t", Long.class).getSingleResult();
             assertThat(amountInDb, is(3L));
         }
     }
 
     @Test
-    void createMany()
-    {
+    void createMany() {
         SkiLesson t3 = new SkiLesson("TestEntityC");
         SkiLesson t4 = new SkiLesson("TestEntityD");
         List<SkiLesson> testEntities = List.of(t3, t4);
@@ -100,18 +83,16 @@ class GenericDAOTest
         List<SkiLesson> result = genericDAO.create(testEntities);
 
         assertNotNull(result);
-        assertThat(result.get(0), samePropertyValuesAs(t3, "rooms"));
-        assertThat(result.get(1), samePropertyValuesAs(t4, "rooms"));
-        try (EntityManager em = emf.createEntityManager())
-        {
+        assertThat(result.get(0), samePropertyValuesAs(t3));
+        assertThat(result.get(1), samePropertyValuesAs(t4));
+        try (EntityManager em = emf.createEntityManager()) {
             Long amountInDb = em.createQuery("SELECT COUNT(t) FROM SkiLesson t", Long.class).getSingleResult();
             assertThat(amountInDb, is(4L));
         }
     }
 
     @Test
-    void read()
-    {
+    void read() {
         SkiLesson expected = t1;
 
         SkiLesson result = genericDAO.getById(SkiLesson.class, t1.getId());
@@ -121,16 +102,14 @@ class GenericDAOTest
     }
 
     @Test
-    void read_notFound()
-    {
+    void read_notFound() {
         DaoException exception = assertThrows(DaoException.class, () -> genericDAO.getById(SkiLesson.class, 1000L));
 
         assertThat(exception.getMessage(), is("Error reading object from db"));
     }
 
     @Test
-    void findAll()
-    {
+    void findAll() {
         List<SkiLesson> expected = List.of(t1, t2);
 
         List<SkiLesson> result = genericDAO.getAll(SkiLesson.class);
@@ -142,8 +121,7 @@ class GenericDAOTest
     }
 
     @Test
-    void update()
-    {
+    void update() {
         t1.setName("UpdatedName");
 
         SkiLesson result = genericDAO.update(t1);
@@ -153,8 +131,7 @@ class GenericDAOTest
     }
 
     @Test
-    void updateMany()
-    {
+    void updateMany() {
         t1.setName("UpdatedName");
         t2.setName("UpdatedName");
         List<SkiLesson> testEntities = List.of(t1, t2);
@@ -168,12 +145,10 @@ class GenericDAOTest
     }
 
     @Test
-    void delete()
-    {
+    void delete() {
         genericDAO.delete(t1);
 
-        try (EntityManager em = emf.createEntityManager())
-        {
+        try (EntityManager em = emf.createEntityManager()) {
             Long amountInDb = em.createQuery("SELECT COUNT(t) FROM SkiLesson t", Long.class).getSingleResult();
             assertThat(amountInDb, is(1L));
             SkiLesson found = em.find(SkiLesson.class, t1.getId());
@@ -182,12 +157,10 @@ class GenericDAOTest
     }
 
     @Test
-    void delete_byId()
-    {
+    void delete_byId() {
         genericDAO.delete(SkiLesson.class, t2.getId());
 
-        try (EntityManager em = emf.createEntityManager())
-        {
+        try (EntityManager em = emf.createEntityManager()) {
             Long amountInDb = em.createQuery("SELECT COUNT(t) FROM SkiLesson t", Long.class).getSingleResult();
             assertThat(amountInDb, is(1L));
             SkiLesson found = em.find(SkiLesson.class, t2.getId());
