@@ -6,7 +6,7 @@ import dat.enums.Level;
 
 import java.util.List;
 
-public interface ITripDAO
+public interface ISkiLessonDAO
 {
     SkiLesson getSkiLessonsById(Long id);
     SkiLesson addInstructor(SkiLesson skiLesson, Instructor instructor);

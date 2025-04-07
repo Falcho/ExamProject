@@ -8,7 +8,7 @@ import jakarta.persistence.EntityManagerFactory;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class SkiLessonDAO extends GenericDAO implements ITripDAO
+public class SkiLessonDAO extends GenericDAO implements ISkiLessonDAO
 {
     public SkiLessonDAO(EntityManagerFactory emf)
     {
