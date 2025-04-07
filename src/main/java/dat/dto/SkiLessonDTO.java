@@ -25,6 +25,7 @@ public class SkiLessonDTO
     private String name;
     private Double price;
     private Level level;
+    private InstructorDTO instructor;
 
     public SkiLessonDTO(SkiLesson skiLesson)
     {
@@ -35,5 +36,10 @@ public class SkiLessonDTO
         this.startTime = skiLesson.getStartTime();
         this.endTime = skiLesson.getEndTime();
         this.level = skiLesson.getLevel();
+        if (skiLesson.getInstructor() != null)
+        {
+            this.instructor = new InstructorDTO(skiLesson.getInstructor());
+        }
+
     }
 }

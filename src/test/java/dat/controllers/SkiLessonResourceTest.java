@@ -156,7 +156,7 @@ class SkiLessonResourceTest
     @Test
     void test_addInstructor()
     {
-        try{
+        try {
             String json = objectMapper.writeValueAsString(in1);
             given()
                     .when()
@@ -166,13 +166,13 @@ class SkiLessonResourceTest
                     .put("/skilesson/" + t1.getId() + "/instructor/" + in1.getId())
                     .then()
                     .statusCode(200)
-                    .body("id", equalTo(in1.getId().intValue()))
-                    .body("firstName", equalTo(in1.getFirstName()))
-                    .body("lastName", equalTo(in1.getLastName()));
-        } catch (JsonProcessingException e)
-        {
+                    .body("id", equalTo(t1.getId().intValue()))
+                    .body("instructor.firstName", equalTo(in1.getFirstName()))
+                    .body("instructor.lastName", equalTo(in1.getLastName()));
+        } catch (JsonProcessingException e) {
             logger.error("Error updating skilesson", e);
             fail();
         }
     }
+
 }
