@@ -1,0 +1,45 @@
+GET localhost:7070/api/routes
+
+###
+GET localhost:7070/api/skilesson
+
+###
+GET localhost:7070/api/skilesson/13
+
+###
+POST localhost:7070/api/skilesson
+Content-Type: application/json
+
+{
+  "startTime": "09:00",
+  "endTime": "12:00",
+  "startPosition": "Harbor Station",
+  "name": "Harbor Explorer",
+  "price": 45.50,
+  "skilesson": "SEA"
+}
+
+###
+PUT localhost:7070/api/skilesson/13/guides/1
+
+
+###
+PUT localhost:7070/api/skilesson/13
+Content-Type: application/json
+
+{
+  "startTime": "13:00",
+  "endTime": "16:00"
+}
+
+###
+GET localhost:7070/api/skilesson/level?level=BEGINNER
+
+###
+GET localhost:7070/api/skilesson/guides/1/overview
+
+###
+DELETE localhost:7070/api/skilesson/13
+
+###
+POST localhost:7070/api/skilesson/populate
