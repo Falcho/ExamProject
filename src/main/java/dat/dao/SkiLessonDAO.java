@@ -40,12 +40,19 @@ public class SkiLessonDAO extends GenericDAO implements ISkiLessonDAO
         super.delete(SkiLesson.class, id);
     }
 
-
     public List<SkiLesson> filterByLevel(Level level)
     {
         List<SkiLesson> allSkiLessons = super.getAll(SkiLesson.class);
         return allSkiLessons.stream()
                 .filter(trip -> level.equals(trip.getLevel()))
+                .collect(Collectors.toList());
+    }
+
+    public List<SkiLesson> getSkiLessonsByInstructor(Long instructorId)
+    {
+        List<SkiLesson> allSkiLessons = super.getAll(SkiLesson.class);
+        return allSkiLessons.stream()
+                .filter(skiLesson -> skiLesson.getInstructor() != null && skiLesson.getInstructor().getId().equals(instructorId))
                 .collect(Collectors.toList());
     }
 
@@ -65,9 +72,4 @@ public class SkiLessonDAO extends GenericDAO implements ISkiLessonDAO
         return updatedSkiLesson;
     }
 
-    @Override
-    public Instructor getInstructorForSkiLesson(SkiLesson skiLesson)
-    {
-        return skiLesson.getInstructor();
-    }
 }
