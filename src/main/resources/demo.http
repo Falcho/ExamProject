@@ -20,7 +20,7 @@ Content-Type: application/json
 }
 
 ###
-PUT localhost:7070/api/skilesson/13/guides/1
+PUT localhost:7070/api/skilesson/13/instructor/1
 
 
 ###
@@ -36,7 +36,10 @@ Content-Type: application/json
 GET localhost:7070/api/skilesson/level?level=BEGINNER
 
 ###
-GET localhost:7070/api/skilesson/guides/1/overview
+GET localhost:7070/api/skilesson/instructor/1/overview
+
+###
+GET localhost:7070/api/skilesson/stats
 
 ###
 DELETE localhost:7070/api/skilesson/13
