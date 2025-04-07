@@ -197,27 +197,6 @@ public class SkiLessonController implements IController
         }
     }
 
-    public void getInstructorsOverview(Context ctx)
-    {
-        try
-        {
-            Long id = ctx.pathParamAsClass("id", Long.class)
-                    .check(i -> i > 0, "id must be at least 0")
-                    .getOrThrow((validator) -> new BadRequestResponse("Invalid id"));
-            Instructor instructor = dao.getById(Instructor.class, id);
-            double totalSumPrice = instructor.getSkiLessons().stream().mapToDouble(SkiLesson::getPrice).sum();
-            Map<String, Object> instructorInfo = new HashMap<>();
-            instructorInfo.put("instructorId", instructor.getId());
-            instructorInfo.put("totalSumPrice", totalSumPrice);
-            ctx.json(instructorInfo);
-        } catch (Exception ex)
-        {
-            logger.error("Error getting instructor overview", ex);
-            throw new ApiException(400, "Error getting instructor overview", ex);
-        }
-
-    }
-
     public void populate(Context ctx)
     {
         try
@@ -230,4 +209,59 @@ public class SkiLessonController implements IController
             throw new ApiException(400, "Error populating database", ex);
         }
     }
+
+    public void getSkiLessonsByInstructor(Context ctx)
+    {
+        try
+        {
+            Long id = ctx.pathParamAsClass("id", Long.class)
+                    .check(i -> i > 0, "id must be at least 0")
+                    .getOrThrow((validator) -> new BadRequestResponse("Invalid id"));
+            List<SkiLesson> skiLessons = sdao.getSkiLessonsByInstructor(id);
+            List<SkiLessonDTO> skiLessonDTOS = skiLessons.stream()
+                    .map(SkiLessonDTO::new)
+                    .collect(Collectors.toList());
+            ctx.json(skiLessonDTOS);
+        } catch (Exception ex)
+        {
+            logger.error("Error getting ski lessons by instructor", ex);
+            throw new ApiException(400, "Error getting ski lessons by instructor", ex);
+        }
+    }
+
+    //Method that calculates the total price, and total time of each instructors ski lessons
+    public void getInstructorStats(Context ctx) {
+        try {
+            List<Instructor> instructors = idao.getAllInstructors();
+
+            List<Map<String, Object>> statsList = new ArrayList<>();
+
+            for (Instructor instructor : instructors) {
+                List<SkiLesson> skiLessons = sdao.getSkiLessonsByInstructor(instructor.getId());
+
+                double totalPrice = skiLessons.stream()
+                        .mapToDouble(SkiLesson::getPrice)
+                        .sum();
+
+                long totalMinutes = skiLessons.stream()
+                        .mapToLong(lesson -> Duration.between(lesson.getStartTime(), lesson.getEndTime()).toMinutes())
+                        .sum();
+
+                Map<String, Object> stats = new HashMap<>();
+                stats.put("instructor id", instructor.getId());
+                stats.put("instructor name", instructor.getFirstName() + " " + instructor.getLastName());
+                stats.put("total Price", totalPrice);
+                stats.put("totalTimeMinutes", totalMinutes);
+
+                statsList.add(stats);
+            }
+
+            ctx.json(statsList);
+        } catch (Exception ex) {
+            logger.error("Error getting instructor stats", ex);
+            throw new ApiException(500, "Error getting instructor stats", ex);
+        }
+    }
+
+
 }
