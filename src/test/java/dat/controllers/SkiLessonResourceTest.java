@@ -20,13 +20,14 @@ import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class LevelResourceTest
+class SkiLessonResourceTest
 {
 
     private static final EntityManagerFactory emf = HibernateConfig.getEntityManagerFactoryForTest();
     final ObjectMapper objectMapper = new ObjectMapper();
     SkiLesson t1, t2;
-    final Logger logger = LoggerFactory.getLogger(LevelResourceTest.class.getName());
+    Instructor in1, in2;
+    final Logger logger = LoggerFactory.getLogger(SkiLessonResourceTest.class.getName());
 
 
     @BeforeAll
@@ -54,37 +55,51 @@ class LevelResourceTest
             //TestEntity[] entities = EntityPopulator.populate(genericDAO);
             t1 = new SkiLesson("TestEntityA");
             t2 = new SkiLesson("TestEntityB");
+            in1 = new Instructor("TestInstructorA", "TestInstructorA");
+            in2 = new Instructor("TestInstructorB", "TestInstructorB");
+
             em.getTransaction().begin();
             em.createQuery("DELETE FROM Instructor ").executeUpdate();
             em.createQuery("DELETE FROM SkiLesson ").executeUpdate();
 
             em.persist(t1);
             em.persist(t2);
+            em.persist(in1);
+            em.persist(in2);
             em.getTransaction().commit();
-        }
-        catch (Exception e)
+        } catch (Exception e)
         {
             logger.error("Error setting up test", e);
         }
     }
 
     @Test
-    void getAll()
+    void test_getAll()
     {
-        given().when().get("/hotel").then().statusCode(200).body("size()", equalTo(2));
+        given()
+                .when()
+                .get("/skilesson")
+                .then()
+                .statusCode(200)
+                .body("size()", equalTo(2));
     }
 
     @Test
-    void getById()
+    void test_getById()
     {
-        given().when().get("/hotel/" + t2.getId()).then().statusCode(200).body("id", equalTo(t2.getId().intValue()));
+        given()
+                .when()
+                .get("/skilesson/" + t2.getId())
+                .then()
+                .statusCode(200)
+                .body("id", equalTo(t2.getId().intValue()));
     }
 
     @Test
-    void create()
+    void test_create()
     {
-        SkiLesson entity = new SkiLesson("Thor Partner Level", "Carl Gustavs Gade 1");
-        Instructor instructor = new Instructor("Bruce","Banner");
+        SkiLesson entity = new SkiLesson("Beginner Snowboarding", "47.3455, 12.7965");
+        Instructor instructor = new Instructor("Bruce", "Banner");
         entity.addInstructor(instructor);
         try
         {
@@ -93,22 +108,21 @@ class LevelResourceTest
                     .contentType("application/json")
                     .accept("application/json")
                     .body(json)
-                    .post("/hotel")
+                    .post("/skilesson")
                     .then()
                     .statusCode(200)
                     .body("name", equalTo(entity.getName()))
-                    .body("address", equalTo(entity.getStartPosition()));
-                    //.body("rooms.size()", equalTo(1));
+                    .body("startPosition", equalTo(entity.getStartPosition()));
         } catch (JsonProcessingException e)
         {
-            logger.error("Error creating hotel", e);
+            logger.error("Error creating skilesson", e);
 
             fail();
         }
     }
 
     @Test
-    void update()
+    void test_update()
     {
         SkiLesson entity = new SkiLesson("New entity2");
         try
@@ -118,23 +132,47 @@ class LevelResourceTest
                     .contentType("application/json")
                     .accept("application/json")
                     .body(json)
-                    .put("/hotel/" + t1.getId()) // double check id
+                    .patch("/skilesson/" + t1.getId()) // double check id
                     .then()
                     .statusCode(200)
                     .body("name", equalTo("New entity2"));
         } catch (JsonProcessingException e)
         {
-            logger.error("Error updating hotel", e);
+            logger.error("Error updating skilesson", e);
             fail();
         }
     }
 
     @Test
-    void delete()
+    void test_delete()
     {
-        given().when()
-                .delete("/hotel/" + t1.getId())
+        given()
+                .when()
+                .delete("/skilesson/" + t1.getId())
                 .then()
                 .statusCode(204);
+    }
+
+    @Test
+    void test_addInstructor()
+    {
+        try{
+            String json = objectMapper.writeValueAsString(in1);
+            given()
+                    .when()
+                    .contentType("application/json")
+                    .accept("application/json")
+                    .body(json)
+                    .put("/skilesson/" + t1.getId() + "/instructor/" + in1.getId())
+                    .then()
+                    .statusCode(200)
+                    .body("id", equalTo(in1.getId().intValue()))
+                    .body("firstName", equalTo(in1.getFirstName()))
+                    .body("lastName", equalTo(in1.getLastName()));
+        } catch (JsonProcessingException e)
+        {
+            logger.error("Error updating skilesson", e);
+            fail();
+        }
     }
 }
