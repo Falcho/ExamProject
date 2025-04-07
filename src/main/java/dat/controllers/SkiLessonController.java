@@ -1,6 +1,7 @@
 package dat.controllers;
 
 import dat.config.HibernateConfig;
+import dat.dao.InstructorDAO;
 import dat.dao.SkiLessonDAO;
 
 import dat.dto.SkiLessonDTO;
@@ -16,34 +17,40 @@ import jakarta.persistence.EntityManagerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.time.Duration;
 
 
 public class SkiLessonController implements IController
 {
-    private final SkiLessonDAO dao;
+    private final SkiLessonDAO sdao;
+    private final InstructorDAO idao;
     private static final Logger logger = LoggerFactory.getLogger(SkiLessonController.class);
     private final static EntityManagerFactory emf = HibernateConfig.getEntityManagerFactory();
 
     public SkiLessonController(EntityManagerFactory emf)
     {
-        dao = new SkiLessonDAO(emf);
+        sdao = new SkiLessonDAO(emf);
+        idao = new InstructorDAO(emf);
     }
 
-    public SkiLessonController(SkiLessonDAO dao)
+    public SkiLessonController(SkiLessonDAO sdao, InstructorDAO idao)
     {
-        this.dao = dao;
+        this.sdao = sdao;
+        this.idao = idao;
     }
+
 
     @Override
     public void getAll(Context ctx)
     {
         try
         {
-            ctx.json(dao.getAll(SkiLesson.class));
+            ctx.json(sdao.getAll(SkiLesson.class));
         } catch (Exception ex)
         {
             logger.error("Error finding all trips", ex);
@@ -60,7 +67,7 @@ public class SkiLessonController implements IController
             Long id = ctx.pathParamAsClass("id", Long.class)
                     .check(i -> i > 0, "id must be at least 0")
                     .getOrThrow((validator) -> new BadRequestResponse("Invalid id"));
-            SkiLessonDTO foundEntity = new SkiLessonDTO(dao.getById(SkiLesson.class, id));
+            SkiLessonDTO foundEntity = new SkiLessonDTO(sdao.getById(SkiLesson.class, id));
             ctx.json(foundEntity);
 
         } catch (Exception ex)
@@ -77,7 +84,7 @@ public class SkiLessonController implements IController
         {
             SkiLessonDTO incomingTest = ctx.bodyAsClass(SkiLessonDTO.class);
             SkiLesson entity = new SkiLesson(incomingTest);
-            SkiLesson createdEntity = dao.create(entity);
+            SkiLesson createdEntity = sdao.create(entity);
             ctx.json(new SkiLessonDTO(createdEntity));
         } catch (Exception ex)
         {
@@ -93,13 +100,13 @@ public class SkiLessonController implements IController
             Long tripId = ctx.pathParamAsClass("lessonId", Long.class)
                     .check(i -> i > 0, "id must be at least 0")
                     .getOrThrow((validator) -> new BadRequestResponse("Invalid id"));
-            SkiLesson skiLesson = dao.getById(SkiLesson.class, tripId);
+            SkiLesson skiLesson = sdao.getById(SkiLesson.class, tripId);
             Long instructorId = ctx.pathParamAsClass("instructorId", Long.class)
                     .check(i -> i > 0, "id must be at least 0")
                     .getOrThrow((validator) -> new BadRequestResponse("Invalid id"));
-            Instructor instructor = dao.getById(Instructor.class, instructorId);
+            Instructor instructor = sdao.getById(Instructor.class, instructorId);
             skiLesson.addInstructor(instructor);
-            SkiLesson updatedSkiLesson = dao.update(skiLesson);
+            SkiLesson updatedSkiLesson = sdao.update(skiLesson);
             ctx.json(new SkiLessonDTO(updatedSkiLesson));
         } catch (Exception ex)
         {
@@ -116,7 +123,7 @@ public class SkiLessonController implements IController
                     .check(i -> i > 0, "id must be at least 0")
                     .getOrThrow((validator) -> new BadRequestResponse("Invalid id"));
             SkiLessonDTO incomingEntity = ctx.bodyAsClass(SkiLessonDTO.class);
-            SkiLesson skiLessonToUpdate = dao.getById(SkiLesson.class, id);
+            SkiLesson skiLessonToUpdate = sdao.getById(SkiLesson.class, id);
             if (incomingEntity.getName() != null)
             {
                 skiLessonToUpdate.setName(incomingEntity.getName());
@@ -141,7 +148,7 @@ public class SkiLessonController implements IController
             {
                 skiLessonToUpdate.setLevel(incomingEntity.getLevel());
             }
-            SkiLesson updatedEntity = dao.update(skiLessonToUpdate);
+            SkiLesson updatedEntity = sdao.update(skiLessonToUpdate);
             SkiLessonDTO returnedEntity = new SkiLessonDTO(updatedEntity);
             ctx.json(returnedEntity);
         } catch (Exception ex)
@@ -159,7 +166,7 @@ public class SkiLessonController implements IController
             Long id = ctx.pathParamAsClass("id", Long.class)
                     .check(i -> i > 0, "id must be at least 0")
                     .getOrThrow((validator) -> new BadRequestResponse("Invalid id"));
-            dao.delete(SkiLesson.class, id);
+            sdao.delete(SkiLesson.class, id);
             ctx.status(204);
         } catch (Exception ex)
         {
@@ -177,7 +184,7 @@ public class SkiLessonController implements IController
             {
                 throw new BadRequestResponse("Level query parameter is required");
             }
-            List<SkiLesson> filteredSkiLessons = dao.filterByLevel(level);
+            List<SkiLesson> filteredSkiLessons = sdao.filterByLevel(level);
             List<SkiLessonDTO> skiLessonDTOS = filteredSkiLessons.stream()
                     .map(SkiLessonDTO::new)
                     .collect(Collectors.toList());
