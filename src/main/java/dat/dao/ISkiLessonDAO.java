@@ -11,6 +11,5 @@ public interface ISkiLessonDAO
     SkiLesson getSkiLessonsById(Long id);
     SkiLesson addInstructor(SkiLesson skiLesson, Instructor instructor);
     SkiLesson removeInstructor(SkiLesson skiLesson, Instructor instructor);
-    Instructor getInstructorForSkiLesson(SkiLesson skiLesson);
     public List<SkiLesson> filterByLevel(Level level);
 }
